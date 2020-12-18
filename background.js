@@ -9,10 +9,21 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 		var tabURL = new URL(results.url)
 		tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 		obj[tabId] = tabURL;
+
+		chrome.extension.getBackgroundPage().console.log("OK");
+		chrome.extension.getBackgroundPage().console.log(tabURL);
+
+		if(["youtube.com"].includes(tabURL)){
+			if(whiteList[tabURL]){
+				chrome.tabs.executeScript(tabId, {file: "youtubeskipper.js"})
+				chrome.tabs.insertCSS(tabId, {file: "patches.css"})
+				chrome.extension.getBackgroundPage().console.log("OK2");
+			}
+		}
 	});
 });
 
-//Siden-navigerirng/endringer kontrollør
+//Siden-navigering/endringer kontrollør
 chrome.tabs.onActivated.addListener(function (activeInfo) {
 	chrome.tabs.get(activeInfo.tabId, function (results) {
 		if (chrome.runtime.lastError) return undefined;
@@ -62,7 +73,8 @@ var callback = (details) => {
 		return {
 			cancel: false
 		};
-	} else {
+	} 
+	else {
 		//Scripts
 		if (details.type == "script") {
 			if (ad.some(e => scriptsList[e])) {
@@ -77,7 +89,8 @@ var callback = (details) => {
 				return {
 					redirectUrl: transparentURL
 				};
-			} else if (ad.some(e => imageList[e])) {
+			} 
+			else if (ad.some(e => imageList[e])) {
 				return {
 					redirectUrl: transparentURL
 				}
@@ -92,7 +105,8 @@ var callback = (details) => {
 						redirectUrl: details.url
 					}
 				};
-			} else if (ad.some(e => adsList[e])) {
+			} 
+			else if (ad.some(e => adsList[e])) {
 				return {
 					redirectUrl: transparentURL
 				};
@@ -112,7 +126,8 @@ chrome.runtime.onInstalled.addListener(function (details) {
 		chrome.tabs.create({
 			url: "welcomePage.html"
 		});
-	} else {
+	} 
+	else {
 		chrome.storage.sync.set({
 			"onOff": true,
 			"whiteList": {}
