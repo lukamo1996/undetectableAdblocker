@@ -86,7 +86,10 @@ function run() {
             active: true,
             status: "complete"
         }, function (info) {
-            if (info && info[0].url) {
+            chrome.runtime.sendMessage("oppdaterWhitelist");
+            
+            chrome.extension.getBackgroundPage().console.log(info);
+            if (info && info.length > 0 && info[0].url) {
                 var url = info[0].url;
                 var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
                 var newWhitelist = [info[0].id, tabURL];
