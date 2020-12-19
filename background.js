@@ -6,8 +6,10 @@ var whiteList = {}
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 	chrome.tabs.get(tabId, function (results) {
 		if (chrome.runtime.lastError) return undefined;
-		var tabURL = new URL(results.url)
-		tabURL = tabURL.hostname.replace(/(www.)/gi, "");
+		if(results && results.url){
+			var tabURL = new URL(results.url)
+			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
+		}
 		obj[tabId] = tabURL;
 
 		if (["youtube.com"].includes(tabURL)) {
@@ -28,7 +30,28 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 chrome.tabs.onActivated.addListener(function (activeInfo) {
 	chrome.tabs.get(activeInfo.tabId, function (results) {
 		if (chrome.runtime.lastError) return undefined;
-		else if (results && results.url) {
+
+		if(results && results.url){
+			var tabURL = new URL(results.url)
+			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
+		}
+
+		chrome.extension.getBackgroundPage().console.log("OK");
+		chrome.extension.getBackgroundPage().console.log(tabURL);
+
+		if (["youtube.com"].includes(tabURL)) {
+			if (whiteList[tabURL]) {
+				chrome.tabs.executeScript(tabId, {
+					file: "youtubeskipper.js"
+				})
+				chrome.tabs.insertCSS(tabId, {
+					file: "patches.css"
+				})
+				chrome.extension.getBackgroundPage().console.log("OK2");
+			}
+		}
+
+		if (results && results.url) {
 			var tabURL = new URL(results.url)
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 			obj[activeInfo.tabId] = tabURL;
@@ -41,7 +64,29 @@ chrome.webNavigation.onBeforeNavigate.addListener(function (tab) {
 	if (tab.frameId == 0) {
 		chrome.tabs.get(tab.tabId, function (results) {
 			if (chrome.runtime.lastError) return undefined;
-			else if (results && results.url) {
+
+			if(results && results.url){
+				var tabURL = new URL(results.url)
+				tabURL = tabURL.hostname.replace(/(www.)/gi, "");
+			}
+
+			chrome.extension.getBackgroundPage().console.log("OK");
+			chrome.extension.getBackgroundPage().console.log(tabURL);
+
+			if (["youtube.com"].includes(tabURL)) {
+				if (whiteList[tabURL]) {
+					chrome.tabs.executeScript(tabId, {
+						file: "youtubeskipper.js"
+					})
+					chrome.tabs.insertCSS(tabId, {
+						file: "patches.css"
+					})
+					chrome.extension.getBackgroundPage().console.log("OK2");
+				}
+			}
+
+
+			if (results && results.url) {
 				var tabURL = new URL(results.url)
 				tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 				obj[tab.tabId] = tabURL;
@@ -187,3 +232,5 @@ function updateWhitelist(message) {
 		whiteList = result["whiteList"]
 	});
 }
+
+//Update whitelist from popup
