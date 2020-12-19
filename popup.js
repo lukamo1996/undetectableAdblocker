@@ -1,115 +1,101 @@
 //Select the slider etc.
-document.addEventListener("DOMContentLoaded", run, false);
+var sliderOne = document.querySelector("#sliderOne");
+var whiteListButton = document.querySelector("#whiteListMeNow");
+var options = document.querySelector("#whitelistedDomainsPage");
+whiteListButton.addEventListener("click", whitelist, false);
+sliderOne.addEventListener("click", save, false);
+options.addEventListener("click", goToOptions, false);
+evaluateButton();
 
-function run() {
-    var sliderOne = document.querySelector("#sliderOne");
-    var whiteListButton = document.querySelector("#whitelistMe");
-    var options = document.querySelector("#whitelistedDomainsPage");
-    whiteListButton.addEventListener("click", whitelist, false);
-    sliderOne.addEventListener("click", save, false);
-    options.addEventListener("click", goToOptions, false);
-    evaluateButton();
+function goToOptions() {
+    chrome.runtime.openOptionsPage();
+}
 
-    function goToOptions() {
-        chrome.runtime.openOptionsPage();
-    }
-
-    //Save function that activates when the slider is clicked
-    function save(e) {
-        chrome.storage.sync.set({
-            onOff: sliderOne.checked
-        });
+//Save function that activates when the slider is clicked
+function save(e) {
+    chrome.storage.sync.set({
+        onOff: sliderOne.checked
+    }, function () {
         chrome.runtime.sendMessage(sliderOne.checked);
         evaluateButton();
-    }
+    });
+}
 
-    //Updates the slider based on storageData
-    function evaluateButton() {
-        chrome.tabs.query({
-            currentWindow: true,
-            active: true
-        }, function (info) {
-            try {
-                var url = info[0].url;
-                var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
-            } catch {}
+//Updates the slider based on storageData
+function evaluateButton() {
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true
+    }, function (info) {
+        try {
+            var url = info[0].url;
+            var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
+        } catch {}
 
-            chrome.storage.sync.get(function (result) {
+        chrome.storage.sync.get(function (result) {
 
-                chrome.extension.getBackgroundPage().console.log(tabURL);
-                chrome.extension.getBackgroundPage().console.log(result["whiteList"])
-
-                if (result.onOff === true) {
-                    sliderOne.checked = true;
-                    chrome.browserAction.setIcon({
-                        path: "images/128.png"
-                    });
-                }
-                if (result.onOff == false) {
-                    sliderOne.checked = false;
-                    chrome.browserAction.setIcon({
-                        path: "images/128_2.png"
-                    });
-                }
-                if (result["whiteList"][tabURL]) {
-                    whiteListButton.checked = true;
-                }
-            });
-
-        });
-    }
-
-    //Issue-reporting-section. Initialize email.js
-    emailjs.init("user_bLkmQPWHQhBxoSQc6zq3h");
-
-    //This code sends an email to the devs so they can fix the adblocker so it works on that website
-    $("#issueText").click(function (event) {
-        chrome.tabs.query({
-            currentWindow: true,
-            active: true,
-            status: "complete"
-        }, function (info) {
-            url = info[0].url;
-            var templateParams = {
-                name: "Ads on this website dont work, please fix it.",
-                notes: url,
-            };
-            $("#issueNotice").show().delay(3000).fadeOut(100);
-            emailjs.send('undetectableadblocker', 'template_M88oUNIA', templateParams);
-        });
-    })
-
-    //Whitelisting
-    function whitelist(e) {
-        chrome.tabs.query({
-            currentWindow: true,
-            active: true,
-            status: "complete"
-        }, function (info) {
-            if (info && info[0].url) {
-                var url = info[0].url;
-                var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
-                var newWhitelist = [info[0].id, tabURL];
-                chrome.extension.getBackgroundPage().console.log(whiteListButton.checked);
-
-                chrome.storage.sync.get(["whiteList"], function (result) {
-                    if (whiteListButton.checked == true) {
-                        chrome.extension.getBackgroundPage().console.log(result);
-                        result["whiteList"][tabURL] = true;
-                        chrome.storage.sync.set({
-                            "whiteList": result["whiteList"]
-                        })
-                        chrome.runtime.sendMessage("oppdaterWhitelist");
-                    } else if (whiteListButton.checked == false) {
-                        delete result["whiteList"][tabURL];
-                        chrome.storage.sync.set({
-                            "whiteList": result["whiteList"]
-                        })
-                        chrome.runtime.sendMessage("oppdaterWhitelist");
-
-                    }
+            if (result.onOff === true) {
+                sliderOne.checked = true;
+                chrome.browserAction.setIcon({
+                    path: "images/128.png"
                 });
             }
+            if (result.onOff == false) {
+                sliderOne.checked = false;
+                chrome.browserAction.setIcon({
+                    path: "images/128_2.png"
+                });
+            }
+            if (result["whiteList"][tabURL]) {
+                document.querySelector("#whiteListMeNow input").checked = true;
+                chrome.extension.getBackgroundPage().console.log(whiteListButton.properties);
+                chrome.extension.getBackgroundPage().console.log(whiteListButton.attributes);
+
+                whiteListButton.checked = true;
+            }
         });
-    }
+
+    });
+}
+
+//Issue-reporting-section. Initialize email.js
+emailjs.init("user_bLkmQPWHQhBxoSQc6zq3h");
+
+//This code sends an email to the devs so they can fix the adblocker so it works on that website
+$("#issueText").click(function (event) {
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true,
+        status: "complete"
+    }, function (info) {
+        url = info[0].url;
+        var templateParams = {
+            name: "Ads on this website dont work, please fix it.",
+            notes: url,
+        };
+        $("#issueNotice").show().delay(3000).fadeOut(100);
+        emailjs.send('undetectableadblocker', 'template_M88oUNIA', templateParams);
+    });
+})
+
+//Whitelisting
+function whitelist(e) {
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true,
+    }, function (info) {
+        if (info && info.length > 0 && info[0].url) {
+            var url = info[0].url;
+            var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
+            if (e.target.localName == "input") {
+                chrome.extension.getBackgroundPage().console.log(e.target.checked);
+                if (e.target.checked == true) {
+                    chrome.runtime.sendMessage([tabURL, "BLOCK"]);
+                } 
+                else if (e.target.checked == false) {
+                    chrome.runtime.sendMessage([tabURL, "UNBLOCK"]);
+                }
+            }
+        }
+    });
 }

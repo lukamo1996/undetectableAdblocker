@@ -10,14 +10,15 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 		tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 		obj[tabId] = tabURL;
 
-		chrome.extension.getBackgroundPage().console.log("OK");
-		chrome.extension.getBackgroundPage().console.log(tabURL);
-
-		if(["youtube.com"].includes(tabURL)){
-			if(whiteList[tabURL]){
-				chrome.tabs.executeScript(tabId, {file: "youtubeskipper.js"})
-				chrome.tabs.insertCSS(tabId, {file: "patches.css"})
-				chrome.extension.getBackgroundPage().console.log("OK2");
+		if (["youtube.com"].includes(tabURL)) {
+			if (!whiteList[tabURL]) {
+				chrome.extension.getBackgroundPage().console.log("Youtube is here and it is not present in the whitelist");
+				chrome.tabs.executeScript(tabId, {
+					file: "youtubeskipper.js"
+				})
+				chrome.tabs.insertCSS(tabId, {
+					file: "patches.css"
+				})
 			}
 		}
 	});
@@ -73,8 +74,7 @@ var callback = (details) => {
 		return {
 			cancel: false
 		};
-	} 
-	else {
+	} else {
 		//Scripts
 		if (details.type == "script") {
 			if (ad.some(e => scriptsList[e])) {
@@ -89,8 +89,7 @@ var callback = (details) => {
 				return {
 					redirectUrl: transparentURL
 				};
-			} 
-			else if (ad.some(e => imageList[e])) {
+			} else if (ad.some(e => imageList[e])) {
 				return {
 					redirectUrl: transparentURL
 				}
@@ -105,8 +104,7 @@ var callback = (details) => {
 						redirectUrl: details.url
 					}
 				};
-			} 
-			else if (ad.some(e => adsList[e])) {
+			} else if (ad.some(e => adsList[e])) {
 				return {
 					redirectUrl: transparentURL
 				};
@@ -126,8 +124,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
 		chrome.tabs.create({
 			url: "welcomePage.html"
 		});
-	} 
-	else {
+	} else {
 		chrome.storage.sync.set({
 			"onOff": true,
 			"whiteList": {}
@@ -150,9 +147,38 @@ chrome.storage.sync.get(function (result) {
 
 //Message listener
 chrome.runtime.onMessage.addListener(function (message, sender, response) {
-	if (message == "oppdaterWhitelist") updateWhitelist(message);
-	else if (message == true) chrome.webRequest.onBeforeRequest.addListener(callback, filter, extra);
-	else if (message == false) chrome.webRequest.onBeforeRequest.removeListener(callback);
+	updateWhitelist(message);
+	if (message === true) chrome.webRequest.onBeforeRequest.addListener(callback, filter, extra);
+	else if (message === false) chrome.webRequest.onBeforeRequest.removeListener(callback);
+	else {
+		if (message[1] == "UNBLOCK") {
+			chrome.storage.sync.get(["whiteList"], function (result) {
+
+				chrome.extension.getBackgroundPage().console.log(message);
+				chrome.extension.getBackgroundPage().console.log(result);
+
+				delete result["whiteList"][message[0]];
+				whiteList = result["whiteList"]
+				chrome.storage.sync.set({
+					"whiteList": result["whiteList"]
+				});
+			});
+		} 
+		else if(message[1] == "BLOCK") {
+			chrome.storage.sync.get(["whiteList"], function (result) {
+
+				chrome.extension.getBackgroundPage().console.log(message);
+				chrome.extension.getBackgroundPage().console.log(message[0]);
+				chrome.extension.getBackgroundPage().console.log(result);
+
+				result["whiteList"][message[0]] = true;
+				whiteList = result["whiteList"]
+				chrome.storage.sync.set({
+					"whiteList": result["whiteList"]
+				});
+			});
+		}
+	}
 });
 
 //Whitelist Updater
