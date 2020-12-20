@@ -10,6 +10,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 			var tabURL = new URL(results.url)
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
+			obj[tabId] = tabURL;
 
 			if (["youtube.com"].includes(tabURL)) {
 				if (!whiteList[tabURL]) {
@@ -21,8 +22,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 					})
 				}
 			}
-
-			obj[tabId] = tabURL;
 
 		}
 	});
