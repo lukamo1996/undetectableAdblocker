@@ -17,7 +17,6 @@ function run() {
                 <i style = "float:right; margin-top:5px; cursor:pointer;" class="fas deleteIt fa-trash-alt"></i>
             </li>`;
             allWhitelistedLinks.innerHTML = allWhitelistedLinks.innerHTML + temp;
-            chrome.extension.getBackgroundPage().console.log(el);
         }
     });
 }
@@ -28,7 +27,6 @@ chrome.storage.onChanged.addListener(function(changes, namespace){
 
 function deleteIt(e){
     if(e.target.tagName == "I"){
-        console.log(e.target.previousSibling.textContent.trim());
         var element = e.target.previousSibling.textContent.trim();
         chrome.storage.sync.get(["whiteList"], function(result){
             delete result["whiteList"][element];
