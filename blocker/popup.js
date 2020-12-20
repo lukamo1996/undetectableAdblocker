@@ -37,20 +37,17 @@ function evaluateButton() {
             if (result.onOff === true) {
                 sliderOne.checked = true;
                 chrome.browserAction.setIcon({
-                    path: "images/128.png"
+                    path: "../images/128.png"
                 });
             }
             if (result.onOff == false) {
                 sliderOne.checked = false;
                 chrome.browserAction.setIcon({
-                    path: "images/128_2.png"
+                    path: "../images/128_2.png"
                 });
             }
             if (result["whiteList"][tabURL]) {
                 document.querySelector("#whiteListMeNow input").checked = true;
-                chrome.extension.getBackgroundPage().console.log(whiteListButton.properties);
-                chrome.extension.getBackgroundPage().console.log(whiteListButton.attributes);
-
                 whiteListButton.checked = true;
             }
         });
@@ -88,7 +85,6 @@ function whitelist(e) {
             var url = info[0].url;
             var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
             if (e.target.localName == "input") {
-                chrome.extension.getBackgroundPage().console.log(e.target.checked);
                 if (e.target.checked == true) {
                     chrome.runtime.sendMessage([tabURL, "BLOCK"]);
                 } 

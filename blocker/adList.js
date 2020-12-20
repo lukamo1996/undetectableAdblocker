@@ -18,6 +18,7 @@ var adsList = {
 	"ccr.cim-prog.top.comcast.net": true,
 	"abeagle-public.buzzfeed.com": true,
 	"abs.proxistore.com": true,
+	"evtubescms.phncdn.com": true,
 	"ac2.msn.com": true,
 	"ac.berlinonline.de": true,
 	"access.njherald.com": true,

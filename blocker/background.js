@@ -6,22 +6,24 @@ var whiteList = {}
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 	chrome.tabs.get(tabId, function (results) {
 		if (chrome.runtime.lastError) return undefined;
-		if(results && results.url){
+		if (results && results.url) {
+
 			var tabURL = new URL(results.url)
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
-		}
-		obj[tabId] = tabURL;
 
-		if (["youtube.com"].includes(tabURL)) {
-			if (!whiteList[tabURL]) {
-				chrome.extension.getBackgroundPage().console.log("Youtube is here and it is not present in the whitelist");
-				chrome.tabs.executeScript(tabId, {
-					file: "youtubeskipper.js"
-				})
-				chrome.tabs.insertCSS(tabId, {
-					file: "patches.css"
-				})
+			if (["youtube.com"].includes(tabURL)) {
+				if (!whiteList[tabURL]) {
+					chrome.tabs.executeScript(tabId, {
+						file: "blocker/youtubeskipper.js"
+					})
+					chrome.tabs.insertCSS(tabId, {
+						file: "blocker/patches.css"
+					})
+				}
 			}
+
+			obj[tabId] = tabURL;
+
 		}
 	});
 });
@@ -31,30 +33,21 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
 	chrome.tabs.get(activeInfo.tabId, function (results) {
 		if (chrome.runtime.lastError) return undefined;
 
-		if(results && results.url){
-			var tabURL = new URL(results.url)
-			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
-		}
-
-		chrome.extension.getBackgroundPage().console.log("OK");
-		chrome.extension.getBackgroundPage().console.log(tabURL);
-
-		if (["youtube.com"].includes(tabURL)) {
-			if (whiteList[tabURL]) {
-				chrome.tabs.executeScript(tabId, {
-					file: "youtubeskipper.js"
-				})
-				chrome.tabs.insertCSS(tabId, {
-					file: "patches.css"
-				})
-				chrome.extension.getBackgroundPage().console.log("OK2");
-			}
-		}
-
 		if (results && results.url) {
 			var tabURL = new URL(results.url)
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 			obj[activeInfo.tabId] = tabURL;
+
+			if (["youtube.com"].includes(tabURL)) {
+				if (whiteList[tabURL]) {
+					chrome.tabs.executeScript(tabId, {
+						file: "blocker/youtubeskipper.js"
+					})
+					chrome.tabs.insertCSS(tabId, {
+						file: "blocker/patches.css"
+					})
+				}
+			}
 		}
 	});
 });
@@ -65,46 +58,33 @@ chrome.webNavigation.onBeforeNavigate.addListener(function (tab) {
 		chrome.tabs.get(tab.tabId, function (results) {
 			if (chrome.runtime.lastError) return undefined;
 
-			if(results && results.url){
-				var tabURL = new URL(results.url)
-				tabURL = tabURL.hostname.replace(/(www.)/gi, "");
-			}
-
-			chrome.extension.getBackgroundPage().console.log("OK");
-			chrome.extension.getBackgroundPage().console.log(tabURL);
-
-			if (["youtube.com"].includes(tabURL)) {
-				if (whiteList[tabURL]) {
-					chrome.tabs.executeScript(tabId, {
-						file: "youtubeskipper.js"
-					})
-					chrome.tabs.insertCSS(tabId, {
-						file: "patches.css"
-					})
-					chrome.extension.getBackgroundPage().console.log("OK2");
-				}
-			}
-
-
 			if (results && results.url) {
 				var tabURL = new URL(results.url)
 				tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 				obj[tab.tabId] = tabURL;
+
+				if (["youtube.com"].includes(tabURL)) {
+					if (whiteList[tabURL]) {
+						chrome.tabs.executeScript(tabId, {
+							file: "blocker/youtubeskipper.js" 
+						});
+						chrome.tabs.insertCSS(tabId, { 
+							file: "blocker/patches.css" 
+						});
+					}
+				}
 			}
 		});
 	}
 });
 
 //WebRequest Parametere
-var filter = {
-	urls: ["<all_urls>"],
-	types: ["media", "script", "xmlhttprequest", "image", "sub_frame"]
-};
+var filter = { urls: ["<all_urls>"], types: ["media", "script", "xmlhttprequest", "image", "sub_frame"]};
 var extra = ["blocking"];
 
 //Andre variabler
 var [url, currentURL, currentURL2, currentURLModified] = ["", "", "", "", ""];
-var transparentURL = chrome.runtime.getURL("images/transparent.gif");
+var transparentURL = chrome.runtime.getURL("../images/transparent.gif");
 var ad = [];
 
 //Listening for requests.
@@ -134,7 +114,8 @@ var callback = (details) => {
 				return {
 					redirectUrl: transparentURL
 				};
-			} else if (ad.some(e => imageList[e])) {
+			} 
+			else if (ad.some(e => imageList[e])) {
 				return {
 					redirectUrl: transparentURL
 				}
@@ -149,7 +130,8 @@ var callback = (details) => {
 						redirectUrl: details.url
 					}
 				};
-			} else if (ad.some(e => adsList[e])) {
+			} 
+			else if (ad.some(e => adsList[e])) {
 				return {
 					redirectUrl: transparentURL
 				};
@@ -166,10 +148,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
 			"whiteList": {}
 		});
 		chrome.webRequest.onBeforeRequest.addListener(callback, filter, extra);
-		chrome.tabs.create({
-			url: "welcomePage.html"
-		});
-	} else {
+		chrome.tabs.create({ url: "../static/welcomePage.html" });
+	} 
+	else {
 		chrome.storage.sync.set({
 			"onOff": true,
 			"whiteList": {}
@@ -198,29 +179,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 	else {
 		if (message[1] == "UNBLOCK") {
 			chrome.storage.sync.get(["whiteList"], function (result) {
-
-				chrome.extension.getBackgroundPage().console.log(message);
-				chrome.extension.getBackgroundPage().console.log(result);
-
 				delete result["whiteList"][message[0]];
 				whiteList = result["whiteList"]
-				chrome.storage.sync.set({
-					"whiteList": result["whiteList"]
-				});
+				chrome.storage.sync.set({ "whiteList": result["whiteList"] });
 			});
 		} 
-		else if(message[1] == "BLOCK") {
+		else if (message[1] == "BLOCK") {
 			chrome.storage.sync.get(["whiteList"], function (result) {
-
-				chrome.extension.getBackgroundPage().console.log(message);
-				chrome.extension.getBackgroundPage().console.log(message[0]);
-				chrome.extension.getBackgroundPage().console.log(result);
-
 				result["whiteList"][message[0]] = true;
 				whiteList = result["whiteList"]
-				chrome.storage.sync.set({
-					"whiteList": result["whiteList"]
-				});
+				chrome.storage.sync.set({ "whiteList": result["whiteList"] });
 			});
 		}
 	}
@@ -228,9 +196,5 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 
 //Whitelist Updater
 function updateWhitelist(message) {
-	chrome.storage.sync.get(["whiteList"], function (result) {
-		whiteList = result["whiteList"]
-	});
+	chrome.storage.sync.get(["whiteList"], function (result) { whiteList = result["whiteList"] });
 }
-
-//Update whitelist from popup
