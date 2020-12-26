@@ -8,9 +8,11 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 		if (chrome.runtime.lastError) return undefined;
 		if (results && results.url) {
 
-			var tabURL = new URL(results.url)
+			var tabURL = new URL(results.url);
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 			obj[tabId] = tabURL;
+			console.log(whiteList);
+			console.log(tabURL);
 
 			if (["youtube.com"].includes(tabURL)) {
 				if (!whiteList[tabURL]) {
@@ -33,7 +35,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
 		if (chrome.runtime.lastError) return undefined;
 
 		if (results && results.url) {
-			var tabURL = new URL(results.url)
+			var tabURL = new URL(results.url);
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 			obj[activeInfo.tabId] = tabURL;
 
@@ -58,7 +60,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(function (tab) {
 			if (chrome.runtime.lastError) return undefined;
 
 			if (results && results.url) {
-				var tabURL = new URL(results.url)
+				var tabURL = new URL(results.url);
 				tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 				obj[tab.tabId] = tabURL;
 
@@ -97,14 +99,15 @@ var callback = (details) => {
 	if (whiteList[obj[details.tabId]]) {
 		return {
 			cancel: false
-		};
-	} else {
+		}
+	} 
+	else {
 		//Scripts
 		if (details.type == "script") {
 			if (ad.some(e => scriptsList[e])) {
 				return {
 					redirectUrl: transparentURL
-				};
+				}
 			}
 		}
 		//Media, Image and Sub_Frame                                                        
@@ -112,7 +115,7 @@ var callback = (details) => {
 			if (ad.some(e => adsList[e])) {
 				return {
 					redirectUrl: transparentURL
-				};
+				}
 			} 
 			else if (ad.some(e => imageList[e])) {
 				return {
@@ -128,12 +131,12 @@ var callback = (details) => {
 					return {
 						redirectUrl: details.url
 					}
-				};
+				}
 			} 
 			else if (ad.some(e => adsList[e])) {
 				return {
 					redirectUrl: transparentURL
-				};
+				}
 			}
 		}
 	}
@@ -162,7 +165,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
 chrome.storage.sync.get(function (result) {
 
 	//Update whitelist based upon storage upon extension-loading
-	whitelist = result["whiteList"];
+	whiteList = result["whiteList"];
 
 	//Start or Turn off the blocker based on storage-saved data
 	if (result.onOff == true) chrome.webRequest.onBeforeRequest.addListener(callback, filter, extra);
@@ -172,7 +175,6 @@ chrome.storage.sync.get(function (result) {
 
 //Message listener
 chrome.runtime.onMessage.addListener(function (message, sender, response) {
-	updateWhitelist(message);
 	if (message === true) chrome.webRequest.onBeforeRequest.addListener(callback, filter, extra);
 	else if (message === false) chrome.webRequest.onBeforeRequest.removeListener(callback);
 	else {
@@ -180,14 +182,20 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 			chrome.storage.sync.get(["whiteList"], function (result) {
 				delete result["whiteList"][message[0]];
 				whiteList = result["whiteList"]
-				chrome.storage.sync.set({ "whiteList": result["whiteList"] });
+				chrome.storage.sync.set({ "whiteList": result["whiteList"] }, function(){
+					updateWhitelist();
+				});
 			});
 		} 
 		else if (message[1] == "BLOCK") {
+			console.log("blocking");
 			chrome.storage.sync.get(["whiteList"], function (result) {
 				result["whiteList"][message[0]] = true;
-				whiteList = result["whiteList"]
-				chrome.storage.sync.set({ "whiteList": result["whiteList"] });
+				whiteList = result["whiteList"];
+				chrome.storage.sync.set({ "whiteList": result["whiteList"] }), function(){
+					console.log("it's saved!")
+					updateWhitelist();
+				};
 			});
 		}
 	}
@@ -195,5 +203,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 
 //Whitelist Updater
 function updateWhitelist(message) {
-	chrome.storage.sync.get(["whiteList"], function (result) { whiteList = result["whiteList"] });
+	chrome.storage.sync.get(["whiteList"], function (result) {
+		console.log(result["whiteList"]);
+		console.log("oppdaterer whitelisten")
+		whiteList = result["whiteList"];
+	});
 }
