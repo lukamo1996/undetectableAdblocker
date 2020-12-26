@@ -85,7 +85,6 @@ function whitelist(e) {
             var url = info[0].url;
             var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
             if (e.target.localName == "input") {
-                console.log(tabURL);
                 if (e.target.checked == true) {
                     console.log("We are blocking " + tabURL);
                     chrome.runtime.sendMessage([tabURL, "BLOCK"]);

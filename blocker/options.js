@@ -27,11 +27,14 @@ chrome.storage.onChanged.addListener(function(changes, namespace){
 
 function deleteIt(e){
     if(e.target.tagName == "I"){
-        var element = e.target.previousSibling.textContent.trim();
-        chrome.storage.sync.get(["whiteList"], function(result){
+        chrome.storage.sync.get(["whiteList"], function (result) {
+            var element = e.target.previousSibling.textContent.trim();
+            chrome.extension.getBackgroundPage().console.log(element);
             delete result["whiteList"][element];
-            chrome.storage.sync.set({"whiteList" : result["whiteList"]});
-            chrome.runtime.sendMessage("oppdaterWhitelist");
+            chrome.extension.getBackgroundPage().console.log(result);
+            chrome.storage.sync.set({"whiteList" : result["whiteList"]}, function(){
+                chrome.runtime.sendMessage("oppdaterWhitelist");
+            });
         });
     }
 }

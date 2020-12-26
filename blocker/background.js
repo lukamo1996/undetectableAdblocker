@@ -177,6 +177,7 @@ chrome.storage.sync.get(function (result) {
 chrome.runtime.onMessage.addListener(function (message, sender, response) {
 	if (message === true) chrome.webRequest.onBeforeRequest.addListener(callback, filter, extra);
 	else if (message === false) chrome.webRequest.onBeforeRequest.removeListener(callback);
+	else if (message === "oppdaterWhitelist") updateWhitelist();
 	else {
 		if (message[1] == "UNBLOCK") {
 			chrome.storage.sync.get(["whiteList"], function (result) {
@@ -202,7 +203,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 });
 
 //Whitelist Updater
-function updateWhitelist(message) {
+function updateWhitelist() {
 	chrome.storage.sync.get(["whiteList"], function (result) {
 		console.log(result["whiteList"]);
 		console.log("oppdaterer whitelisten")
