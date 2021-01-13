@@ -65,7 +65,7 @@ $("#issueText").click(function (event) {
         active: true,
         status: "complete"
     }, function (info) {
-        url = info[0].url;
+        let url = info[0].url;
         var templateParams = {
             name: "Ads on this website dont work, please fix it.",
             notes: url,
@@ -86,7 +86,6 @@ function whitelist(e) {
             var tabURL = new URL(url).hostname.replace(/(www.)/gi, "");
             if (e.target.localName == "input") {
                 if (e.target.checked == true) {
-                    console.log("We are blocking " + tabURL);
                     chrome.runtime.sendMessage([tabURL, "BLOCK"]);
                 } 
                 else if (e.target.checked == false) {

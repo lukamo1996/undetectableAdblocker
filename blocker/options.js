@@ -11,7 +11,7 @@ function run() {
         if(Object.keys(whiteList).length == 0){
             allWhitelistedLinks.innerHTML = "<i>No domains whitelisted.</i>";
         }
-        for (el in whiteList) {
+        for (let el in whiteList) {
             var temp = `
             <li class="list-group-item">${el}
                 <i style = "float:right; margin-top:5px; cursor:pointer;" class="fas deleteIt fa-trash-alt"></i>
@@ -29,9 +29,7 @@ function deleteIt(e){
     if(e.target.tagName == "I"){
         chrome.storage.sync.get(["whiteList"], function (result) {
             var element = e.target.previousSibling.textContent.trim();
-            chrome.extension.getBackgroundPage().console.log(element);
             delete result["whiteList"][element];
-            chrome.extension.getBackgroundPage().console.log(result);
             chrome.storage.sync.set({"whiteList" : result["whiteList"]}, function(){
                 chrome.runtime.sendMessage("oppdaterWhitelist");
             });

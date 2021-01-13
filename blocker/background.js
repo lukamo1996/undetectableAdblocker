@@ -11,8 +11,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 			var tabURL = new URL(results.url);
 			tabURL = tabURL.hostname.replace(/(www.)/gi, "");
 			obj[tabId] = tabURL;
-			console.log(whiteList);
-			console.log(tabURL);
 
 			if (["youtube.com"].includes(tabURL)) {
 				if (!whiteList[tabURL]) {
@@ -24,7 +22,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 					})
 				}
 			}
-
 		}
 	});
 });
@@ -96,6 +93,9 @@ var callback = (details) => {
 	currentURLModified = url.hostname + url.pathname;
 	ad = [url.pathname, currentURL, currentURL2, currentURLModified];
 
+	//Rar undefined-bug some dukker opp ved førstegangs-installasjon
+	if(whiteList == undefined) whiteList = {}
+
 	if (whiteList[obj[details.tabId]]) {
 		return {
 			cancel: false
@@ -124,7 +124,7 @@ var callback = (details) => {
 			}
 		}
 		//XMLHttpRequests
-		else if (details.type = "xmlhttprequest") {
+		else if (details.type == "xmlhttprequest") {
 			if (url.pathname == "/get_video_info") {
 				//embedded youtube fix
 				if (/(embedded)/gi.test(details.url) == true) {
@@ -189,12 +189,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 			});
 		} 
 		else if (message[1] == "BLOCK") {
-			console.log("blocking");
 			chrome.storage.sync.get(["whiteList"], function (result) {
 				result["whiteList"][message[0]] = true;
 				whiteList = result["whiteList"];
 				chrome.storage.sync.set({ "whiteList": result["whiteList"] }), function(){
-					console.log("it's saved!")
 					updateWhitelist();
 				};
 			});
@@ -205,8 +203,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, response) {
 //Whitelist Updater
 function updateWhitelist() {
 	chrome.storage.sync.get(["whiteList"], function (result) {
-		console.log(result["whiteList"]);
-		console.log("oppdaterer whitelisten")
 		whiteList = result["whiteList"];
 	});
 }
