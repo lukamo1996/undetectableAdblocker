@@ -22440,16 +22440,26 @@ var adsList = {
 	"gondar.meitustat.com": true,
 	"gonomy.info": true,
 	"goodworldwide-d.openx.net": true,
+<<<<<<< HEAD
 	"dfpAdUnitContainer": true,
+=======
+>>>>>>> aea8d4e4531c74a2f43d681383db6e9c43dfab70
 	"goog.applovin.com": true,
 	"google-analytics.bi.owox.com": true,
 	"google-placement.com.re.getclicky.com": true,
 	"google.east-s2s.1rx.io": true,
 	"google.rtb.adx1.com": true,
+<<<<<<< HEAD
 	"OUTBRAIN": true,
 	"google.unbounce.com": true,
 	"googleads2.g.doubleclick.net": true,
 	"googleads4.g.doubleclick.net": true,
+=======
+	"google.unbounce.com": true,
+	"googleads2.g.doubleclick.net": true,
+	"googleads4.g.doubleclick.net": true,
+	"googleadservices.com": true,
+>>>>>>> aea8d4e4531c74a2f43d681383db6e9c43dfab70
 	"googlebidder-dc1.yieldoptimizer.com": true,
 	"googlebidder-dc2.yieldoptimizer.com": true,
 	"googleforwork.co1.qualtrics.com": true,
@@ -58564,7 +58574,10 @@ var adsList = {
 	"netseer.com": true,
 	"neweggstats.com": true,
 	"newonads.com": true,
+<<<<<<< HEAD
 	"about:blank": true,
+=======
+>>>>>>> aea8d4e4531c74a2f43d681383db6e9c43dfab70
 	"newthuads.com": true,
 	"newtopsites.com": true,
 	"ngs.impress.co.jp": true,
